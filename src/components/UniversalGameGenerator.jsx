@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Palette, Sparkles, Eye, Download, Copy, RefreshCw } from 'lucide-react';
+import { Palette, Shuffle, Sparkles, Copy, Download, FileText, Code, BookOpen } from 'lucide-react';
 import './UniversalGameGenerator.css';
 
 const UniversalGameGenerator = () => {
@@ -13,139 +13,118 @@ const UniversalGameGenerator = () => {
   
   // Color customization state
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [primaryColor, setPrimaryColor] = useState('#667eea');
-  const [secondaryColor, setSecondaryColor] = useState('#764ba2');
+  const [startColor, setStartColor] = useState('#667eea');
+  const [endColor, setEndColor] = useState('#764ba2');
   const [generatedTheme, setGeneratedTheme] = useState(null);
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
 
-  // Predefined color combinations
+  // Color presets
   const colorPresets = [
-    { name: 'Ocean Depths', primary: '#1e3a8a', secondary: '#06b6d4', description: 'Deep blue to cyan' },
-    { name: 'Sunset Blaze', primary: '#dc2626', secondary: '#f59e0b', description: 'Red to amber' },
-    { name: 'Forest Mystique', primary: '#166534', secondary: '#10b981', description: 'Forest green to emerald' },
-    { name: 'Purple Cosmos', primary: '#581c87', secondary: '#a855f7', description: 'Deep purple to violet' },
-    { name: 'Arctic Aurora', primary: '#0f172a', secondary: '#38bdf8', description: 'Midnight to sky blue' },
-    { name: 'Volcanic Energy', primary: '#7c2d12', secondary: '#fb923c', description: 'Dark red to orange' },
-    { name: 'Cyber Neon', primary: '#0c4a6e', secondary: '#22d3ee', description: 'Dark blue to cyan' },
-    { name: 'Royal Elegance', primary: '#4c1d95', secondary: '#c084fc', description: 'Royal purple to lavender' }
+    { name: 'Ocean Depths', start: '#0077be', end: '#00a8cc' },
+    { name: 'Sunset Glow', start: '#ff6b6b', end: '#ffa726' },
+    { name: 'Forest Mist', start: '#2d5016', end: '#a8e6cf' },
+    { name: 'Purple Haze', start: '#667eea', end: '#764ba2' },
+    { name: 'Fire Storm', start: '#c31432', end: '#240b36' },
+    { name: 'Arctic Frost', start: '#74b9ff', end: '#0984e3' },
+    { name: 'Golden Hour', start: '#f7971e', end: '#ffd200' },
+    { name: 'Deep Space', start: '#2c3e50', end: '#4a00e0' }
   ];
 
-  // Generate color theme using the XML prompt template
-  const generateColorTheme = useCallback(async (startColor, endColor) => {
-    setIsGeneratingTheme(true);
+  // Apply theme to the app
+  const applyTheme = useCallback((start, end) => {
+    const root = document.documentElement;
+    root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${start} 0%, ${end} 100%)`);
     
-    try {
-      // Simulate AI processing with intelligent color analysis
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Convert colors to hex if they're not already
-      const hexStart = startColor.startsWith('#') ? startColor : startColor;
-      const hexEnd = endColor.startsWith('#') ? endColor : endColor;
-      
-      // Generate theme name based on colors
-      const colorNames = {
-        '#1e3a8a': 'Ocean', '#06b6d4': 'Cyan', '#dc2626': 'Crimson', '#f59e0b': 'Amber',
-        '#166534': 'Forest', '#10b981': 'Emerald', '#581c87': 'Royal', '#a855f7': 'Violet',
-        '#0f172a': 'Midnight', '#38bdf8': 'Sky', '#7c2d12': 'Volcanic', '#fb923c': 'Sunset',
-        '#0c4a6e': 'Deep', '#22d3ee': 'Electric', '#4c1d95': 'Regal', '#c084fc': 'Lavender'
-      };
-      
-      const startName = colorNames[hexStart] || 'Dynamic';
-      const endName = colorNames[hexEnd] || 'Vibrant';
-      const themeName = `${startName} ${endName} Flow`;
-      
-      // Generate intermediate colors
-      const accentColor = blendColors(hexStart, hexEnd, 0.5);
-      const surfaceColor = '#0f172a';
-      const textPrimary = '#f8fafc';
-      const textSecondary = '#cbd5e1';
-      
-      const theme = {
-        name: themeName,
-        concept: `A ${themeName.toLowerCase()} theme that embodies the transition from ${startName.toLowerCase()} depths to ${endName.toLowerCase()} brilliance, creating a sophisticated glass morphic aesthetic.`,
-        gradient: {
-          start: hexStart,
-          end: hexEnd,
-          css: `linear-gradient(135deg, ${hexStart} 0%, ${hexEnd} 100%)`
-        },
-        palette: {
-          primary: hexStart,
-          secondary: hexEnd,
-          accent: accentColor,
-          textPrimary: textPrimary,
-          textSecondary: textSecondary,
-          surface: surfaceColor,
-          glassMorphic: `rgba(${hexToRgb(hexStart).join(', ')}, 0.1)`
-        },
-        elements: {
-          background: `The app background features the full gradient with glass morphic overlays using backdrop-filter: blur(10px) and rgba transparency.`,
-          headers: `Navigation bars use a horizontal slice of the gradient with 20% opacity glass morphic effect.`,
-          buttons: `Primary CTA buttons showcase the full gradient with hover states that intensify the colors by 20%.`,
-          cards: `Panels use glass morphic styling with ${accentColor} borders and subtle gradient backgrounds.`,
-          icons: `Key icons incorporate the gradient for brand consistency and visual hierarchy.`
-        },
-        aesthetic: `Bold, futuristic, and vibrant with a sleek glass morphic feel that conveys energy and sophistication.`
-      };
-      
-      setGeneratedTheme(theme);
-    } catch (error) {
-      console.error('Theme generation error:', error);
-      alert('An error occurred during theme generation. Please try again.');
-    } finally {
-      setIsGeneratingTheme(false);
+    // Update the main background
+    const generator = document.querySelector('.universal-generator');
+    if (generator) {
+      generator.style.background = `linear-gradient(135deg, ${start} 0%, ${end} 100%)`;
     }
   }, []);
 
-  // Helper function to blend two colors
-  const blendColors = (color1, color2, ratio) => {
-    const rgb1 = hexToRgb(color1);
-    const rgb2 = hexToRgb(color2);
-    
-    const blended = rgb1.map((c1, i) => {
-      const c2 = rgb2[i];
-      return Math.round(c1 * (1 - ratio) + c2 * ratio);
-    });
-    
-    return rgbToHex(blended[0], blended[1], blended[2]);
-  };
-
-  // Helper function to convert hex to RGB
-  const hexToRgb = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16)
-    ] : [0, 0, 0];
-  };
-
-  // Helper function to convert RGB to hex
-  const rgbToHex = (r, g, b) => {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  };
-
-  // Apply color preset
-  const applyColorPreset = (preset) => {
-    setPrimaryColor(preset.primary);
-    setSecondaryColor(preset.secondary);
-    generateColorTheme(preset.primary, preset.secondary);
-  };
-
   // Generate random colors
   const generateRandomColors = () => {
-    const randomHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-    const newPrimary = randomHex();
-    const newSecondary = randomHex();
-    setPrimaryColor(newPrimary);
-    setSecondaryColor(newSecondary);
-    generateColorTheme(newPrimary, newSecondary);
+    const getRandomColor = () => {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    };
+    
+    const newStart = getRandomColor();
+    const newEnd = getRandomColor();
+    setStartColor(newStart);
+    setEndColor(newEnd);
+    applyTheme(newStart, newEnd);
   };
 
-  // Topic analysis function (existing code)
+  // Generate theme using the XML prompt
+  const generateTheme = async () => {
+    setIsGeneratingTheme(true);
+    
+    try {
+      // Simulate AI processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create a mock theme based on the colors
+      const themes = [
+        {
+          name: 'Solar Flare',
+          concept: 'A vibrant, energetic theme inspired by solar activity and cosmic energy.',
+          accent: '#ff8a65',
+          textPrimary: '#ffffff',
+          textSecondary: '#e0e0e0',
+          background: '#1a1a2e'
+        },
+        {
+          name: 'Deep Ocean',
+          concept: 'A calming, mysterious theme evoking the depths of the ocean.',
+          accent: '#4fc3f7',
+          textPrimary: '#ffffff',
+          textSecondary: '#b0bec5',
+          background: '#0d1421'
+        },
+        {
+          name: 'Aurora Borealis',
+          concept: 'A magical theme capturing the ethereal beauty of northern lights.',
+          accent: '#81c784',
+          textPrimary: '#ffffff',
+          textSecondary: '#c8e6c9',
+          background: '#1b2631'
+        }
+      ];
+      
+      const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
+      setGeneratedTheme(selectedTheme);
+      
+    } catch (error) {
+      console.error('Theme generation error:', error);
+    } finally {
+      setIsGeneratingTheme(false);
+    }
+  };
+
+  // Apply preset colors
+  const applyPreset = (preset) => {
+    setStartColor(preset.start);
+    setEndColor(preset.end);
+    applyTheme(preset.start, preset.end);
+  };
+
+  // Initialize with default theme
+  React.useEffect(() => {
+    applyTheme(startColor, endColor);
+  }, [startColor, endColor, applyTheme]);
+
+  // Topic analysis function
   const analyzeTopicForGameElements = (topic) => {
     const topicLower = topic.toLowerCase();
     
+    // Define topic categories and their game elements
     const topicPatterns = {
+      // Science & Technology
       climate: {
         resources: ['Carbon Emissions', 'Economic Growth', 'Public Support', 'Technology Level', 'Environmental Health'],
         actions: ['Implement Green Tech', 'Carbon Tax Policy', 'Industrial Regulation', 'Public Education'],
@@ -160,6 +139,7 @@ const UniversalGameGenerator = () => {
         duration: 90,
         concepts: ['orbital mechanics', 'life support systems', 'mission planning', 'risk management']
       },
+      // Business & Economics
       startup: {
         resources: ['Cash Flow', 'Product Quality', 'Market Share', 'Team Morale', 'Customer Satisfaction'],
         actions: ['Hire Talent', 'Marketing Campaign', 'Product Development', 'Seek Investment'],
@@ -167,6 +147,7 @@ const UniversalGameGenerator = () => {
         duration: 100,
         concepts: ['lean startup', 'product-market fit', 'burn rate', 'scaling challenges']
       },
+      // Health & Medicine
       pandemic: {
         resources: ['Public Health', 'Economic Stability', 'Healthcare Capacity', 'Social Cohesion', 'Government Trust'],
         actions: ['Implement Lockdown', 'Vaccine Distribution', 'Economic Support', 'Public Communication'],
@@ -174,6 +155,7 @@ const UniversalGameGenerator = () => {
         duration: 150,
         concepts: ['epidemiology', 'herd immunity', 'contact tracing', 'policy balance']
       },
+      // Education
       education: {
         resources: ['Student Engagement', 'Learning Outcomes', 'Teacher Satisfaction', 'Budget', 'Innovation Level'],
         actions: ['Adopt New Technology', 'Teacher Training', 'Curriculum Reform', 'Infrastructure Investment'],
@@ -183,6 +165,7 @@ const UniversalGameGenerator = () => {
       }
     };
 
+    // Find matching pattern or create generic one
     let gameElements = null;
     for (const [key, elements] of Object.entries(topicPatterns)) {
       if (topicLower.includes(key)) {
@@ -191,6 +174,7 @@ const UniversalGameGenerator = () => {
       }
     }
 
+    // Generic fallback
     if (!gameElements) {
       gameElements = {
         resources: ['Resource A', 'Resource B', 'Resource C', 'Resource D', 'Resource E'],
@@ -204,31 +188,12 @@ const UniversalGameGenerator = () => {
     return gameElements;
   };
 
-  // Generate XML prompt with color theme integration
+  // Generate XML prompt
   const generateGamePrompt = useCallback((topic) => {
     const elements = analyzeTopicForGameElements(topic);
     const gameName = topic.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join('') + 'Game';
-
-    const colorThemeSection = generatedTheme ? `
-  <visual_theme>
-    <theme_name>${generatedTheme.name}</theme_name>
-    <color_palette>
-      <primary_gradient>${generatedTheme.gradient.css}</primary_gradient>
-      <primary_color>${generatedTheme.palette.primary}</primary_color>
-      <secondary_color>${generatedTheme.palette.secondary}</secondary_color>
-      <accent_color>${generatedTheme.palette.accent}</accent_color>
-      <text_primary>${generatedTheme.palette.textPrimary}</text_primary>
-      <text_secondary>${generatedTheme.palette.textSecondary}</text_secondary>
-      <surface_color>${generatedTheme.palette.surface}</surface_color>
-    </color_palette>
-    <glass_morphic_effects>
-      <background_overlay>backdrop-filter: blur(10px); background: ${generatedTheme.palette.glassMorphic};</background_overlay>
-      <card_styling>background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid ${generatedTheme.palette.accent};</card_styling>
-    </glass_morphic_effects>
-    <aesthetic_description>${generatedTheme.aesthetic}</aesthetic_description>
-  </visual_theme>` : '';
 
     return `<prompt>
   <role>
@@ -285,8 +250,6 @@ const UniversalGameGenerator = () => {
     </game_rules>
   </game_specifications>
 
-  ${colorThemeSection}
-
   <technical_requirements>
     <framework>React functional components only</framework>
     <state_management>
@@ -300,7 +263,6 @@ const UniversalGameGenerator = () => {
       <requirement>Use color-coded progress bars with smooth animations</requirement>
       <requirement>Implement visual feedback for critical events</requirement>
       <requirement>Ensure responsive design for different screen sizes</requirement>
-      ${generatedTheme ? `<requirement>Apply the ${generatedTheme.name} color theme throughout the component</requirement>` : ''}
     </styling>
     <code_quality>
       <requirement>Well-commented code explaining ${topic} concepts</requirement>
@@ -341,27 +303,14 @@ const UniversalGameGenerator = () => {
     <constraint>Optimize for both educational value and engaging gameplay</constraint>
   </constraints>
 </prompt>`;
-  }, [generatedTheme]);
+  }, []);
 
-  // Generate game code with custom colors
+  // Generate game code
   const generateGameCode = useCallback((topic) => {
     const elements = analyzeTopicForGameElements(topic);
     const gameName = topic.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join('').replace(/[^a-zA-Z0-9]/g, '') + 'Game';
-
-    // Use custom theme colors if available
-    const themeColors = generatedTheme ? {
-      primary: generatedTheme.palette.primary,
-      secondary: generatedTheme.palette.secondary,
-      accent: generatedTheme.palette.accent,
-      gradient: generatedTheme.gradient.css
-    } : {
-      primary: primaryColor,
-      secondary: secondaryColor,
-      accent: blendColors(primaryColor, secondaryColor, 0.5),
-      gradient: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
-    };
 
     const componentCode = `import React, { useState, useEffect, useCallback } from 'react';
 import './${gameName}.css';
@@ -387,19 +336,11 @@ const ${gameName} = () => {
   const ACTION_COOLDOWN = 3;
   const CRITICAL_THRESHOLD = 15;
 
-  // Custom theme colors
-  const THEME_COLORS = {
-    primary: '${themeColors.primary}',
-    secondary: '${themeColors.secondary}',
-    accent: '${themeColors.accent}',
-    gradient: '${themeColors.gradient}'
-  };
-
-  // Resource definitions with custom colors
+  // Resource definitions
   const resourceConfig = {
     ${elements.resources.map((resource, index) => {
       const key = resource.replace(/\s+/g, '').toLowerCase();
-      const colors = [themeColors.primary, themeColors.accent, '#ef4444', '#8b5cf6', '#f59e0b'];
+      const colors = ['#3b82f6', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b'];
       return `${key}: {
       name: '${resource}',
       color: '${colors[index]}',
@@ -605,7 +546,7 @@ const ${gameName} = () => {
       .map(([key]) => resourceConfig[key].name);
 
     return (
-      <div className="${gameName.toLowerCase()}-game game-over" style={{ background: THEME_COLORS.gradient }}>
+      <div className="${gameName.toLowerCase()}-game game-over">
         <div className="game-over-screen">
           <h1>${topic} Simulation Complete</h1>
           
@@ -650,11 +591,7 @@ const ${gameName} = () => {
             </div>
           </div>
 
-          <button 
-            className="restart-button" 
-            onClick={restartGame}
-            style={{ background: THEME_COLORS.gradient }}
-          >
+          <button className="restart-button" onClick={restartGame}>
             Initialize New ${topic} System
           </button>
         </div>
@@ -663,7 +600,7 @@ const ${gameName} = () => {
   }
 
   return (
-    <div className="${gameName.toLowerCase()}-game" style={{ background: THEME_COLORS.gradient }}>
+    <div className="${gameName.toLowerCase()}-game">
       <header className="game-header">
         <h1>${topic} System Manager</h1>
         <div className="timer-display">
@@ -707,7 +644,7 @@ const ${gameName} = () => {
                       className="progress-fill"
                       style={{ 
                         width: \`\${value}%\`,
-                        background: config.color,
+                        backgroundColor: config.color,
                         boxShadow: status === 'critical' ? \`0 0 10px \${config.color}\` : 'none'
                       }}
                     />
@@ -736,10 +673,6 @@ const ${gameName} = () => {
                     disabled={isOnCooldown || gameState !== 'playing'}
                     onMouseEnter={() => setShowTooltip(\`action-\${key}\`)}
                     onMouseLeave={() => setShowTooltip(null)}
-                    style={{ 
-                      background: isOnCooldown ? 'rgba(100, 100, 100, 0.2)' : \`linear-gradient(135deg, \${THEME_COLORS.primary}40, \${THEME_COLORS.secondary}40)\`,
-                      borderColor: THEME_COLORS.accent
-                    }}
                   >
                     <div className="action-content">
                       <h3>{action.name}</h3>
@@ -802,48 +735,35 @@ const ${gameName} = () => {
 export default ${gameName};`;
 
     return componentCode;
-  }, [generatedTheme, primaryColor, secondaryColor]);
+  }, []);
 
-  // Generate CSS with custom colors
+  // Generate CSS
   const generateGameCSS = useCallback((topic) => {
     const elements = analyzeTopicForGameElements(topic);
     const gameName = topic.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join('').replace(/[^a-zA-Z0-9]/g, '') + 'Game';
 
-    // Use custom theme colors if available
-    const colors = generatedTheme ? {
-      primary: generatedTheme.palette.primary,
-      secondary: generatedTheme.palette.secondary,
-      accent: generatedTheme.palette.accent
-    } : {
-      primary: primaryColor,
-      secondary: secondaryColor,
-      accent: blendColors(primaryColor, secondaryColor, 0.5)
+    const themeColors = {
+      environmental: { primary: '#10b981', secondary: '#059669', accent: '#34d399' },
+      space: { primary: '#3b82f6', secondary: '#1d4ed8', accent: '#60a5fa' },
+      business: { primary: '#f59e0b', secondary: '#d97706', accent: '#fbbf24' },
+      medical: { primary: '#ef4444', secondary: '#dc2626', accent: '#f87171' },
+      academic: { primary: '#8b5cf6', secondary: '#7c3aed', accent: '#a78bfa' },
+      generic: { primary: '#6b7280', secondary: '#4b5563', accent: '#9ca3af' }
     };
 
-    return `/* ${gameName}.css - Custom Theme: ${generatedTheme?.name || 'Default'} */
+    const colors = themeColors[elements.theme] || themeColors.generic;
+
+    return `/* ${gameName}.css */
 
 .${gameName.toLowerCase()}-game {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
+  background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%);
   color: #e5e7eb;
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
-  position: relative;
-}
-
-.${gameName.toLowerCase()}-game::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(1px);
-  z-index: -1;
 }
 
 .${gameName.toLowerCase()}-game * {
@@ -857,18 +777,17 @@ export default ${gameName};`;
   align-items: center;
   margin-bottom: 30px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  background: rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.1);
+  border: 1px solid ${colors.primary};
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.3);
 }
 
 .game-header h1 {
   margin: 0;
   font-size: 2.5rem;
-  color: #ffffff;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  color: ${colors.primary};
+  text-shadow: 0 0 10px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.5);
   letter-spacing: 1px;
 }
 
@@ -881,7 +800,7 @@ export default ${gameName};`;
 
 .timer-label {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #9ca3af;
   text-transform: uppercase;
 }
 
@@ -889,39 +808,76 @@ export default ${gameName};`;
   font-size: 2rem;
   font-weight: bold;
   color: ${colors.accent};
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 10px rgba(${colors.accent.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.5);
   transition: all 0.3s ease;
 }
 
 .timer-value.critical {
   color: #ef4444;
-  text-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
   animation: pulse 1s infinite;
 }
 
-/* Glass Morphic Panels */
-.resource-dashboard,
-.action-panel,
-.system-status,
-.concept-tracker {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+/* Special Event Styles */
+.special-event {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: rgba(239, 68, 68, 0.95);
+  border: 2px solid #ef4444;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+  animation: eventAlert 0.5s ease-out;
+}
+
+.event-content h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.8rem;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.event-content p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+/* Main Game Layout */
+.game-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  height: calc(100vh - 200px);
+}
+
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 /* Resource Dashboard */
-.resource-dashboard h2,
-.action-panel h2 {
+.resource-dashboard {
+  background: rgba(${colors.secondary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.1);
+  border: 1px solid ${colors.secondary};
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 0 20px rgba(${colors.secondary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.2);
+}
+
+.resource-dashboard h2 {
   margin: 0 0 20px 0;
-  color: #ffffff;
+  color: ${colors.primary};
   text-align: center;
   font-size: 1.5rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .resource-bar {
@@ -929,27 +885,24 @@ export default ${gameName};`;
   margin-bottom: 20px;
   padding: 15px;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 .resource-bar:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 }
 
 .resource-bar.critical {
-  border-color: #ef4444;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
   animation: criticalPulse 2s infinite;
 }
 
 .resource-bar.warning {
-  border-color: #f59e0b;
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  border: 1px solid #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .resource-header {
@@ -962,13 +915,11 @@ export default ${gameName};`;
 .resource-name {
   font-weight: bold;
   font-size: 1.1rem;
-  color: #ffffff;
 }
 
 .resource-value {
   font-size: 1.2rem;
   font-weight: bold;
-  color: ${colors.accent};
 }
 
 .progress-bar {
@@ -998,6 +949,23 @@ export default ${gameName};`;
 }
 
 /* Action Panel */
+.action-panel {
+  background: rgba(${colors.accent.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.1);
+  border: 1px solid ${colors.accent};
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 0 20px rgba(${colors.accent.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.2);
+}
+
+.action-panel h2 {
+  margin: 0 0 20px 0;
+  color: ${colors.accent};
+  text-align: center;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1006,10 +974,9 @@ export default ${gameName};`;
 
 .action-button {
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px solid ${colors.accent};
-  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.2), rgba(${colors.secondary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.2));
+  border: 2px solid ${colors.primary};
+  border-radius: 12px;
   padding: 20px;
   color: #ffffff;
   cursor: pointer;
@@ -1019,8 +986,8 @@ export default ${gameName};`;
 }
 
 .action-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 25px rgba(${hexToRgb(colors.accent).join(', ')}, 0.4);
+  background: linear-gradient(135deg, rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.4), rgba(${colors.secondary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.4));
+  box-shadow: 0 0 20px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.4);
   transform: translateY(-3px);
 }
 
@@ -1031,14 +998,14 @@ export default ${gameName};`;
 }
 
 .action-button.cooldown {
-  background: rgba(100, 100, 100, 0.1);
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2), rgba(150, 150, 150, 0.2));
   border-color: #6b7280;
 }
 
 .action-content h3 {
   margin: 0 0 10px 0;
   font-size: 1.1rem;
-  color: ${colors.accent};
+  color: ${colors.primary};
   text-transform: uppercase;
 }
 
@@ -1046,7 +1013,7 @@ export default ${gameName};`;
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.3;
-  color: rgba(255, 255, 255, 0.9);
+  color: #d1d5db;
 }
 
 .cooldown-indicator {
@@ -1061,44 +1028,35 @@ export default ${gameName};`;
   font-weight: bold;
 }
 
-/* Game Layout */
-.game-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 30px;
-  height: calc(100vh - 200px);
-}
-
-.main-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
+/* Side Panel */
 .side-panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* System Status */
-.system-status h3,
-.concept-tracker h3 {
+.system-status {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid #8b5cf6;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+  flex: 1;
+}
+
+.system-status h3 {
   margin: 0 0 15px 0;
-  color: ${colors.accent};
+  color: #a78bfa;
   text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(${hexToRgb(colors.accent).join(', ')}, 0.3);
 }
 
 .event-log {
   height: 300px;
   overflow-y: auto;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(5px);
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
   padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .log-entry {
@@ -1108,37 +1066,54 @@ export default ${gameName};`;
   font-size: 0.85rem;
   line-height: 1.3;
   animation: fadeIn 0.5s ease-out;
-  background: rgba(255, 255, 255, 0.05);
+}
+
+.log-entry.system {
+  background: rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.1);
   border-left: 3px solid ${colors.primary};
 }
 
 .log-entry.action {
-  border-left-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
 }
 
 .log-entry.event {
-  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
 }
 
 .timestamp {
-  color: rgba(255, 255, 255, 0.6);
+  color: #9ca3af;
   font-size: 0.8rem;
   margin-right: 10px;
 }
 
-/* Concept Tracker */
+.concept-tracker {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid #f59e0b;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.concept-tracker h3 {
+  margin: 0 0 15px 0;
+  color: #fbbf24;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .concept {
   margin-bottom: 15px;
   padding: 10px;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(5px);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .concept h4 {
   margin: 0 0 5px 0;
-  color: ${colors.accent};
+  color: #fcd34d;
   font-size: 0.9rem;
 }
 
@@ -1146,39 +1121,7 @@ export default ${gameName};`;
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.3;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* Special Events */
-.special-event {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  background: rgba(239, 68, 68, 0.95);
-  backdrop-filter: blur(15px);
-  border: 2px solid #ef4444;
-  border-radius: 20px;
-  padding: 30px;
-  max-width: 500px;
-  text-align: center;
-  box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
-  animation: eventAlert 0.5s ease-out;
-}
-
-.event-content h3 {
-  margin: 0 0 15px 0;
-  font-size: 1.8rem;
-  color: #ffffff;
-  text-transform: uppercase;
-}
-
-.event-content p {
-  margin: 0;
-  font-size: 1.1rem;
-  line-height: 1.4;
-  color: #ffffff;
+  color: #d1d5db;
 }
 
 /* Tooltips */
@@ -1188,15 +1131,14 @@ export default ${gameName};`;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
   color: white;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.9rem;
   white-space: nowrap;
   z-index: 100;
-  border: 1px solid ${colors.accent};
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid ${colors.primary};
+  box-shadow: 0 0 15px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.3);
   margin-bottom: 10px;
 }
 
@@ -1233,13 +1175,12 @@ export default ${gameName};`;
 
 .game-over-screen {
   background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(20px);
   border: 2px solid ${colors.primary};
-  border-radius: 25px;
+  border-radius: 20px;
   padding: 40px;
   max-width: 800px;
   width: 90%;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 30px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.4);
 }
 
 .game-over-screen h1 {
@@ -1247,7 +1188,11 @@ export default ${gameName};`;
   color: ${colors.primary};
   margin-bottom: 30px;
   font-size: 2.5rem;
-  text-shadow: 0 0 20px rgba(${hexToRgb(colors.primary).join(', ')}, 0.5);
+  text-shadow: 0 0 15px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.5);
+}
+
+.performance-analysis {
+  margin-bottom: 30px;
 }
 
 .performance-analysis h2 {
@@ -1261,17 +1206,14 @@ export default ${gameName};`;
   justify-content: space-between;
   align-items: center;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 10px;
   margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .score-label {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #ffffff;
 }
 
 .score-value {
@@ -1281,17 +1223,99 @@ export default ${gameName};`;
 
 .score-value.excellent {
   color: #10b981;
-  text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
 .score-value.good {
   color: #f59e0b;
-  text-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
 }
 
 .score-value.poor {
   color: #ef4444;
-  text-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.critical-failures {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.critical-failures h3 {
+  color: #ef4444;
+  margin-bottom: 10px;
+}
+
+.critical-failures ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.resource-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.resource-final {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+}
+
+.resource-final .critical {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.resource-final .warning {
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+.resource-final .normal {
+  color: #10b981;
+}
+
+.insights {
+  margin-bottom: 30px;
+}
+
+.insights h2 {
+  color: #fbbf24;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.insights-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.insight {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 20px;
+  border-left: 4px solid #fbbf24;
+}
+
+.insight h3 {
+  color: #fcd34d;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.insight p {
+  margin: 0;
+  line-height: 1.4;
+  color: #d1d5db;
 }
 
 .restart-button {
@@ -1308,11 +1332,11 @@ export default ${gameName};`;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 0 25px rgba(${hexToRgb(colors.primary).join(', ')}, 0.3);
 }
 
 .restart-button:hover {
-  box-shadow: 0 0 35px rgba(${hexToRgb(colors.primary).join(', ')}, 0.5);
+  background: linear-gradient(135deg, ${colors.secondary}, ${colors.primary});
+  box-shadow: 0 0 25px rgba(${colors.primary.slice(1).match(/.{2}/g).map(hex => parseInt(hex, 16)).join(', ')}, 0.5);
   transform: translateY(-2px);
 }
 
@@ -1323,8 +1347,8 @@ export default ${gameName};`;
 }
 
 @keyframes criticalPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+  0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
 }
 
 @keyframes shimmer {
@@ -1378,18 +1402,24 @@ export default ${gameName};`;
     font-size: 1.5rem;
   }
   
-  .resource-dashboard,
-  .action-panel,
-  .system-status,
-  .concept-tracker {
-    padding: 15px;
+  .insights-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .resource-summary {
+    grid-template-columns: 1fr;
   }
 }
 
 /* Accessibility */
 .action-button:focus,
 .restart-button:focus {
-  outline: 2px solid ${colors.accent};
+  outline: 2px solid ${colors.primary};
+  outline-offset: 2px;
+}
+
+.resource-bar:focus-within {
+  outline: 1px solid ${colors.primary};
   outline-offset: 2px;
 }
 
@@ -1401,7 +1431,9 @@ export default ${gameName};`;
   }
   
   .resource-bar,
-  .action-button {
+  .action-button,
+  .system-status,
+  .concept-tracker {
     border-width: 2px;
   }
 }
@@ -1414,33 +1446,17 @@ export default ${gameName};`;
     transition-duration: 0.01ms !important;
   }
 }`;
-  }, [generatedTheme, primaryColor, secondaryColor]);
+  }, []);
 
-  // Generate README with color customization info
+  // Generate README
   const generateReadme = useCallback((topic, framework) => {
     const gameName = topic.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join('').replace(/[^a-zA-Z0-9]/g, '') + 'Game';
 
     const isVite = framework === 'vite';
-    const themeInfo = generatedTheme ? `
 
-## Custom Color Theme: ${generatedTheme.name}
-
-This game uses a custom color theme generated specifically for your topic:
-
-- **Primary Color**: ${generatedTheme.palette.primary}
-- **Secondary Color**: ${generatedTheme.palette.secondary}
-- **Accent Color**: ${generatedTheme.palette.accent}
-- **Theme Concept**: ${generatedTheme.concept}
-
-The theme applies glass morphic design principles with:
-- Backdrop blur effects for depth
-- Gradient backgrounds for visual appeal
-- Translucent overlays for modern aesthetics
-- Responsive color adaptation across all UI elements` : '';
-
-    return `# ${topic} Educational Game${themeInfo}
+    return `# ${topic} Educational Game
 
 An interactive educational arcade game that teaches ${topic} concepts through strategic resource management and decision-making.
 
@@ -1455,8 +1471,6 @@ This game simulates ${topic} management challenges where players must balance mu
 - **Dynamic Events**: Respond to unexpected challenges and opportunities
 - **Educational Content**: Learn ${topic} concepts through gameplay
 - **Performance Analytics**: Track your management effectiveness
-- **Custom Color Themes**: Personalized visual design system
-- **Glass Morphic UI**: Modern, translucent interface elements
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## Installation and Setup
@@ -1560,30 +1574,6 @@ npm run ${isVite ? 'dev' : 'dev'}
 # Open browser to http://localhost:${isVite ? '5173' : '3000'}
 \`\`\`
 
-## Color Theme Customization
-
-This game includes a sophisticated color theme system that creates cohesive, professional visual designs:
-
-### Theme Features
-- **Glass Morphic Design**: Translucent elements with backdrop blur effects
-- **Gradient Backgrounds**: Smooth color transitions for visual depth
-- **Adaptive Colors**: UI elements automatically adapt to your chosen palette
-- **Accessibility**: High contrast ratios and reduced motion support
-
-### Customizing Colors
-To modify the color theme:
-
-1. **Update Primary/Secondary Colors**: Change the \`THEME_COLORS\` object in the component
-2. **Regenerate Theme**: Use the color picker in the generator to create new themes
-3. **Apply Consistently**: The system automatically applies colors across all UI elements
-
-### Color Psychology for Education
-Different color combinations can enhance learning:
-- **Blue/Cyan**: Promotes focus and calm thinking
-- **Green/Emerald**: Encourages growth and balance
-- **Purple/Violet**: Stimulates creativity and imagination
-- **Red/Orange**: Increases energy and urgency
-
 ## Game Mechanics
 
 ### Resources
@@ -1619,49 +1609,26 @@ This game teaches:
 - **${topic} Concepts**: Domain-specific knowledge and principles
 - **Strategic Planning**: Long-term vs. short-term thinking
 
-## Advanced Customization
+## Customization
 
-### Modifying Visual Theme
-Edit the CSS variables to change the overall appearance:
-\`\`\`css
-:root {
-  --primary-color: ${generatedTheme?.palette.primary || primaryColor};
-  --secondary-color: ${generatedTheme?.palette.secondary || secondaryColor};
-  --accent-color: ${generatedTheme?.palette.accent || blendColors(primaryColor, secondaryColor, 0.5)};
-  --glass-opacity: 0.1;
-  --blur-strength: 15px;
-}
-\`\`\`
+### Modifying Resources
+Edit the \`resourceConfig\` object to change:
+- Resource names and descriptions
+- Initial values and colors
+- Critical vs. non-critical designation
 
-### Adding New Resources
-Edit the \`resourceConfig\` object to add or modify resources:
-\`\`\`javascript
-const resourceConfig = {
-  newResource: {
-    name: 'New Resource',
-    color: '#your-color',
-    description: 'Description of the resource',
-    critical: true // or false
-  }
-};
-\`\`\`
+### Adjusting Actions
+Modify the \`actions\` object to:
+- Change action names and descriptions
+- Adjust resource effects
+- Update flavor text and concepts
 
-### Creating Custom Actions
-Modify the \`actions\` object to add new strategic options:
-\`\`\`javascript
-const actions = {
-  newAction: {
-    name: 'New Action',
-    description: 'What this action does',
-    effects: {
-      resource1: 10,  // positive effect
-      resource2: -5   // negative effect
-    },
-    flavorText: 'Action feedback text',
-    concept: 'Educational concept explanation'
-  }
-};
-\`\`\`
+### Timing and Events
+Customize gameplay by modifying:
+- Game duration (\`GAME_DURATION\`)
+- Action cooldown (\`ACTION_COOLDOWN\`)
+- Event trigger times
+- Event effects
 
 ## Troubleshooting
 
@@ -1672,10 +1639,10 @@ const actions = {
 - Verify all imports are correct
 - Ensure CSS file is properly linked
 
-**Color theme not applying:**
-- Confirm CSS variables are properly set
+**Styling issues:**
+- Confirm CSS file path is correct
 - Check for CSS syntax errors
-- Verify color values are valid hex codes
+- Verify responsive design on different screen sizes
 
 **Performance problems:**
 - Monitor browser console for warnings
@@ -1760,14 +1727,9 @@ This game is designed for:
 - Self-directed learning
 - Training programs
 - Educational demonstrations
-- Color theory and design education
 
-Feel free to modify and adapt for your specific educational needs!
-
----
-
-*Generated with custom color theme: ${generatedTheme?.name || 'Default Theme'}*`;
-  }, [generatedTheme, primaryColor, secondaryColor]);
+Feel free to modify and adapt for your specific educational needs!`;
+  }, []);
 
   // Main generation function
   const handleGenerate = async () => {
@@ -1779,6 +1741,7 @@ Feel free to modify and adapt for your specific educational needs!
     setIsGenerating(true);
     
     try {
+      // Simulate processing time for better UX
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const prompt = generateGamePrompt(userInput);
@@ -1819,10 +1782,15 @@ Feel free to modify and adapt for your specific educational needs!
   };
 
   return (
-    <div className="universal-generator" style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}>
+    <div className="universal-generator">
       <header className="generator-header">
-        <h1>🎮 Universal Game Design Prompt Generator</h1>
-        <p>Transform any topic into an engaging educational arcade game with custom themes</p>
+        <h1>🎮 Educational Arcade Game App Creator</h1>
+        <p>Transform any topic into an engaging educational arcade game</p>
+        {generatedTheme && (
+          <span className="theme-badge">
+            {generatedTheme.name} Theme
+          </span>
+        )}
       </header>
 
       <div className="generator-content">
@@ -1856,128 +1824,146 @@ Feel free to modify and adapt for your specific educational needs!
 
               {/* Color Customization Section */}
               <div className="form-group">
-                <label>
-                  <Palette className="inline-icon" />
-                  Customize Visual Theme
-                </label>
-                <button
+                <button 
                   type="button"
                   className="color-picker-toggle"
                   onClick={() => setShowColorPicker(!showColorPicker)}
                 >
-                  <Eye className="inline-icon" />
-                  {showColorPicker ? 'Hide' : 'Show'} Color Options
+                  <Palette className="inline-icon" />
+                  {showColorPicker ? 'Hide' : 'Show'} Color Customization
                 </button>
-              </div>
-
-              {showColorPicker && (
-                <div className="color-customization">
-                  <div className="color-inputs">
-                    <div className="color-input-group">
-                      <label htmlFor="primary-color">Primary Color:</label>
-                      <div className="color-input-wrapper">
-                        <input
-                          type="color"
-                          id="primary-color"
-                          value={primaryColor}
-                          onChange={(e) => setPrimaryColor(e.target.value)}
-                        />
-                        <input
-                          type="text"
-                          value={primaryColor}
-                          onChange={(e) => setPrimaryColor(e.target.value)}
-                          placeholder="#667eea"
-                        />
+                
+                {showColorPicker && (
+                  <div className="color-customization">
+                    <div className="color-inputs">
+                      <div className="color-input-group">
+                        <label>Start Color</label>
+                        <div className="color-input-wrapper">
+                          <input
+                            type="color"
+                            value={startColor}
+                            onChange={(e) => {
+                              setStartColor(e.target.value);
+                              applyTheme(e.target.value, endColor);
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={startColor}
+                            onChange={(e) => {
+                              setStartColor(e.target.value);
+                              applyTheme(e.target.value, endColor);
+                            }}
+                            placeholder="#667eea"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="color-input-group">
+                        <label>End Color</label>
+                        <div className="color-input-wrapper">
+                          <input
+                            type="color"
+                            value={endColor}
+                            onChange={(e) => {
+                              setEndColor(e.target.value);
+                              applyTheme(startColor, e.target.value);
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={endColor}
+                            onChange={(e) => {
+                              setEndColor(e.target.value);
+                              applyTheme(startColor, e.target.value);
+                            }}
+                            placeholder="#764ba2"
+                          />
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="color-input-group">
-                      <label htmlFor="secondary-color">Secondary Color:</label>
-                      <div className="color-input-wrapper">
-                        <input
-                          type="color"
-                          id="secondary-color"
-                          value={secondaryColor}
-                          onChange={(e) => setSecondaryColor(e.target.value)}
-                        />
-                        <input
-                          type="text"
-                          value={secondaryColor}
-                          onChange={(e) => setSecondaryColor(e.target.value)}
-                          placeholder="#764ba2"
-                        />
+
+                    <div className="color-actions">
+                      <button
+                        type="button"
+                        className="generate-theme-button"
+                        onClick={generateTheme}
+                        disabled={isGeneratingTheme}
+                      >
+                        <Sparkles className="inline-icon" />
+                        {isGeneratingTheme ? 'Generating...' : 'Generate AI Theme'}
+                      </button>
+                      
+                      <button
+                        type="button"
+                        className="random-colors-button"
+                        onClick={generateRandomColors}
+                      >
+                        <Shuffle className="inline-icon" />
+                        Random Colors
+                      </button>
+                    </div>
+
+                    <div className="color-presets">
+                      <h4>Color Presets</h4>
+                      <div className="preset-grid">
+                        {colorPresets.map((preset, index) => (
+                          <button
+                            key={index}
+                            className="preset-button"
+                            style={{
+                              background: `linear-gradient(135deg, ${preset.start}, ${preset.end})`
+                            }}
+                            onClick={() => applyPreset(preset)}
+                          >
+                            {preset.name}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="color-actions">
-                    <button
-                      type="button"
-                      className="generate-theme-button"
-                      onClick={() => generateColorTheme(primaryColor, secondaryColor)}
-                      disabled={isGeneratingTheme}
-                    >
-                      <Sparkles className="inline-icon" />
-                      {isGeneratingTheme ? 'Generating Theme...' : 'Generate Theme'}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      className="random-colors-button"
-                      onClick={generateRandomColors}
-                    >
-                      <RefreshCw className="inline-icon" />
-                      Random Colors
-                    </button>
-                  </div>
-
-                  <div className="color-presets">
-                    <h4>Quick Presets:</h4>
-                    <div className="preset-grid">
-                      {colorPresets.map((preset, index) => (
-                        <button
-                          key={index}
-                          className="preset-button"
-                          onClick={() => applyColorPreset(preset)}
+                    {generatedTheme && (
+                      <div className="generated-theme-preview">
+                        <h4>{generatedTheme.name}</h4>
+                        <p>{generatedTheme.concept}</p>
+                        <div className="theme-colors">
+                          <div 
+                            className="color-swatch" 
+                            style={{ backgroundColor: startColor }}
+                          >
+                            Start
+                          </div>
+                          <div 
+                            className="color-swatch" 
+                            style={{ backgroundColor: generatedTheme.accent }}
+                          >
+                            Accent
+                          </div>
+                          <div 
+                            className="color-swatch" 
+                            style={{ backgroundColor: endColor }}
+                          >
+                            End
+                          </div>
+                        </div>
+                        <div 
+                          className="theme-preview"
                           style={{
-                            background: `linear-gradient(135deg, ${preset.primary}, ${preset.secondary})`
+                            background: `linear-gradient(135deg, ${startColor}, ${endColor})`
                           }}
-                          title={preset.description}
                         >
-                          {preset.name}
-                        </button>
-                      ))}
-                    </div>
+                          Preview of {generatedTheme.name} Theme
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {generatedTheme && (
-                    <div className="generated-theme-preview">
-                      <h4>🎨 Generated Theme: {generatedTheme.name}</h4>
-                      <p>{generatedTheme.concept}</p>
-                      <div className="theme-colors">
-                        <div className="color-swatch" style={{ backgroundColor: generatedTheme.palette.primary }}>
-                          Primary
-                        </div>
-                        <div className="color-swatch" style={{ backgroundColor: generatedTheme.palette.secondary }}>
-                          Secondary
-                        </div>
-                        <div className="color-swatch" style={{ backgroundColor: generatedTheme.palette.accent }}>
-                          Accent
-                        </div>
-                      </div>
-                      <div className="theme-preview" style={{ background: generatedTheme.gradient.css }}>
-                        <span>Theme Preview</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
               <button 
                 className="generate-button"
                 onClick={handleGenerate}
                 disabled={isGenerating || !userInput.trim()}
-                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
               >
                 {isGenerating ? '🔄 Generating...' : '🚀 Generate Game'}
               </button>
@@ -1985,10 +1971,10 @@ Feel free to modify and adapt for your specific educational needs!
               {generatedPrompt && (
                 <div className="generation-complete">
                   <h3>✅ Generation Complete!</h3>
-                  <p>Your educational game has been generated with {generatedTheme ? `custom ${generatedTheme.name} theme` : 'default styling'}. Use the tabs above to view:</p>
+                  <p>Your educational game has been generated. Use the tabs above to view:</p>
                   <ul>
                     <li><strong>XML Prompt</strong> - The engineered prompt for AI systems</li>
-                    <li><strong>Game Code</strong> - Complete React component and CSS with custom theme</li>
+                    <li><strong>Game Code</strong> - Complete React component and CSS</li>
                     <li><strong>Setup Guide</strong> - Step-by-step implementation instructions</li>
                   </ul>
                 </div>
@@ -2008,7 +1994,7 @@ Feel free to modify and adapt for your specific educational needs!
                 </div>
                 <div className="feature-card">
                   <h4>🎨 Custom Styling</h4>
-                  <p>Thematic CSS with glass morphic design and custom color themes</p>
+                  <p>Thematic CSS with animations and responsive design</p>
                 </div>
                 <div className="feature-card">
                   <h4>📚 Setup Guide</h4>
@@ -2019,8 +2005,8 @@ Feel free to modify and adapt for your specific educational needs!
                   <p>Resource management, strategic decisions, and dynamic events</p>
                 </div>
                 <div className="feature-card">
-                  <h4>🌈 Color Themes</h4>
-                  <p>Professional color palette generation with glass morphic effects</p>
+                  <h4>📊 Analytics</h4>
+                  <p>Performance tracking and educational assessment features</p>
                 </div>
               </div>
             </div>
@@ -2034,18 +2020,21 @@ Feel free to modify and adapt for your specific educational needs!
                 className={`tab-button ${activeTab === 'prompt' ? 'active' : ''}`}
                 onClick={() => setActiveTab('prompt')}
               >
+                <FileText className="inline-icon" />
                 📝 XML Prompt
               </button>
               <button
                 className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
                 onClick={() => setActiveTab('code')}
               >
+                <Code className="inline-icon" />
                 ⚛️ Game Code
               </button>
               <button
                 className={`tab-button ${activeTab === 'readme' ? 'active' : ''}`}
                 onClick={() => setActiveTab('readme')}
               >
+                <BookOpen className="inline-icon" />
                 📚 Setup Guide
               </button>
             </div>
@@ -2054,13 +2043,15 @@ Feel free to modify and adapt for your specific educational needs!
               {activeTab === 'prompt' && (
                 <div className="output-section">
                   <div className="section-header">
-                    <h3>Generated XML Prompt {generatedTheme && <span className="theme-badge">with {generatedTheme.name}</span>}</h3>
+                    <h3>Generated XML Prompt</h3>
                     <div className="action-buttons">
                       <button onClick={() => copyToClipboard(generatedPrompt)}>
-                        <Copy className="inline-icon" /> Copy
+                        <Copy className="inline-icon" />
+                        📋 Copy
                       </button>
                       <button onClick={() => downloadFile(generatedPrompt, 'game-prompt.xml')}>
-                        <Download className="inline-icon" /> Download
+                        <Download className="inline-icon" />
+                        💾 Download
                       </button>
                     </div>
                   </div>
@@ -2073,14 +2064,21 @@ Feel free to modify and adapt for your specific educational needs!
               {activeTab === 'code' && (
                 <div className="output-section">
                   <div className="code-tabs">
+                    <div className="code-tab-header">
+                      <button className="code-tab active">Component (.jsx)</button>
+                      <button className="code-tab">Styles (.css)</button>
+                    </div>
+                    
                     <div className="section-header">
-                      <h3>React Component Code {generatedTheme && <span className="theme-badge">with {generatedTheme.name}</span>}</h3>
+                      <h3>React Component Code</h3>
                       <div className="action-buttons">
                         <button onClick={() => copyToClipboard(generatedCode.component)}>
-                          <Copy className="inline-icon" /> Copy Component
+                          <Copy className="inline-icon" />
+                          📋 Copy Component
                         </button>
                         <button onClick={() => copyToClipboard(generatedCode.css)}>
-                          <Copy className="inline-icon" /> Copy CSS
+                          <Copy className="inline-icon" />
+                          📋 Copy CSS
                         </button>
                         <button onClick={() => {
                           const gameName = userInput.split(' ').map(word => 
@@ -2088,7 +2086,8 @@ Feel free to modify and adapt for your specific educational needs!
                           ).join('').replace(/[^a-zA-Z0-9]/g, '') + 'Game';
                           downloadFile(generatedCode.component, `${gameName}.jsx`);
                         }}>
-                          <Download className="inline-icon" /> Download Component
+                          <Download className="inline-icon" />
+                          💾 Download Component
                         </button>
                         <button onClick={() => {
                           const gameName = userInput.split(' ').map(word => 
@@ -2096,7 +2095,8 @@ Feel free to modify and adapt for your specific educational needs!
                           ).join('').replace(/[^a-zA-Z0-9]/g, '') + 'Game';
                           downloadFile(generatedCode.css, `${gameName}.css`);
                         }}>
-                          <Download className="inline-icon" /> Download CSS
+                          <Download className="inline-icon" />
+                          💾 Download CSS
                         </button>
                       </div>
                     </div>
@@ -2110,7 +2110,7 @@ Feel free to modify and adapt for your specific educational needs!
                       </div>
                       
                       <div className="code-section">
-                        <h4>CSS Styles {generatedTheme && `(${generatedTheme.name} Theme)`}</h4>
+                        <h4>CSS Styles</h4>
                         <pre className="code-block">
                           <code>{generatedCode.css}</code>
                         </pre>
@@ -2126,10 +2126,12 @@ Feel free to modify and adapt for your specific educational needs!
                     <h3>Setup Guide & README</h3>
                     <div className="action-buttons">
                       <button onClick={() => copyToClipboard(generatedReadme)}>
-                        <Copy className="inline-icon" /> Copy
+                        <Copy className="inline-icon" />
+                        📋 Copy
                       </button>
                       <button onClick={() => downloadFile(generatedReadme, 'README.md')}>
-                        <Download className="inline-icon" /> Download README
+                        <Download className="inline-icon" />
+                        💾 Download README
                       </button>
                     </div>
                   </div>
@@ -2149,7 +2151,7 @@ Feel free to modify and adapt for your specific educational needs!
         <div className="footer-content">
           <p>
             🎯 <strong>Pro Tip:</strong> Use the engineered prompt with AI assistants to generate 
-            customized games, or use the complete code for immediate implementation with professional color themes!
+            customized games, or use the complete code for immediate implementation!
           </p>
           <div className="footer-links">
             <a href="#examples">View Examples</a>
